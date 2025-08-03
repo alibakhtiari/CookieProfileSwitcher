@@ -9,7 +9,7 @@
 
 <body>
 	<div class="container">
-		<h1><img src="cookie.png" alt="" style="width: 64px; height: 64px;" /> Cookie Profile Switcher</h1>
+		<h1><img src="cookie.png" alt="" /> Cookie Profile Switcher</h1>
 		<hr />
 		<div id="data">
 			<fieldset id="data-content">
@@ -18,8 +18,13 @@
 			<div class="alert alert-warning">
 				<strong>Warning: Modifying this data could potentially cause issues with your profiles or the extension. Make sure you know what you are doing, or at least export your data first! If all else fails, you can clear your profile data using the button below & start over.</strong>
 			</div>
-			<textarea id="profile-data-textarea" style="width:100%;height:500px;max-width:100%;"></textarea>
-			<button id="save-profile-data" class="btn btn-primary">Save</button> <button id="import-profile-data" class="btn btn-info">Import</button> <button id="export-profile-data" class="btn btn-info">Export</button> <button id="clear-profile-data" class="btn btn-warning">Clear Profile Data</button><br ><br>
+			<textarea id="profile-data-textarea"></textarea>
+			<div class="button-group">
+				<button id="save-profile-data" class="btn btn-primary">Save</button>
+				<button id="import-profile-data" class="btn btn-info">Import</button>
+				<button id="export-profile-data" class="btn btn-info">Export</button>
+				<button id="clear-profile-data" class="btn btn-warning">Clear Profile Data</button>
+			</div>
 			<input type="file" id="import-profile-data-input" accept=".json" style="display:none"/>
 			</fieldset>
 		</div>
