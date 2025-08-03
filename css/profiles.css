@@ -76,11 +76,6 @@ body {
 
 .profile-actions a {
   text-decoration: none;
-  color: #007bff;
-  padding: 4px 8px;
-  border: 1px solid #007bff;
-  border-radius: 3px;
-  font-size: 0.85em;
 }
 
 .profile-actions a:hover {
