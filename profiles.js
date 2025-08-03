@@ -262,6 +262,7 @@ function changeProfile(event) {
 	var target = event.target;
 	var saveData = event.saveData;
 	var currentDomain = document.getElementById('domain_label').textContent;
+
 	chrome.cookies.getAll({ domain: currentDomain }, function (cookies) {
 		var currentProfile = document.getElementById('profile_label').textContent;
 
@@ -273,36 +274,52 @@ function changeProfile(event) {
 			var profile = items.profiles;
 			var domainProfiles = profile[currentDomain]['profileData'];
 
+			// Save current cookies
 			domainProfiles[currentProfile] = oldProfileData;
 			profile[currentDomain]['currentProfile'] = target.innerHTML;
 			profile[currentDomain]['profileData'] = domainProfiles;
 
-
+			// Clear all current cookies for the domain
 			for (var i = 0; i < cookies.length; i++) {
 				chrome.cookies.remove({ url: extrapolateUrlFromCookie(cookies[i]), name: cookies[i].name });
 			}
 
+			// Restore selected profile cookies
 			if (newProfileData.length > 0) {
 				for (var i = 0; i < newProfileData.length; i++) {
 					try {
-						newProfileData[i]['url'] = "http" + (newProfileData[i]['secure'] ? "s" : "") + "://" + newProfileData[i]['domain'].replace(/^\./, "");
-						delete newProfileData[i]['hostOnly'];
-						delete newProfileData[i]['session'];
-						chrome.cookies.set(newProfileData[i]);
+						let cookie = { ...newProfileData[i] };
+
+						cookie.url = "http" + (cookie.secure ? "s" : "") + "://" + cookie.domain.replace(/^\./, "");
+
+						// Remove invalid properties
+						delete cookie.hostOnly;
+						delete cookie.session;
+
+						// Fix for __Host- cookies
+						if (cookie.name.startsWith("__Host-")) {
+							cookie.secure = true;
+							cookie.path = "/";
+							delete cookie.domain; // Required by __Host- rules
+						}
+
+						// Try to set cookie
+						chrome.cookies.set(cookie, function (setCookie) {
+							if (chrome.runtime.lastError) {
+								console.warn("Failed to set cookie:", cookie.name, chrome.runtime.lastError.message);
+							}
+						});
 					} catch (e) {
-						console.log(e)
+						console.error("Error setting cookie:", e);
 					}
 				}
 			}
 
-
-
-			if (typeof saveData === 'undefined' || saveData == true) {
+			if (typeof saveData === 'undefined' || saveData === true) {
 				chrome.storage.local.set({ "profiles": profile }, function () {
 					loadProfiles();
 				});
 			}
-
 
 			chrome.tabs.query({ active: true, currentWindow: true }, function (arrayOfTabs) {
 				chrome.scripting.executeScript({
@@ -312,14 +329,10 @@ function changeProfile(event) {
 					}
 				});
 			});
-
 		});
-
 	});
 }
 // END PROFILE FUNCTIONS //
-
-
 
 // BEGIN COOKIE FUNCTIONS //
 function loadDomainCookieStore() {
@@ -328,9 +341,6 @@ function loadDomainCookieStore() {
 	});
 }
 // END COOKIE FUNCTIONS //
-
-
-
 
 
 function domainLoaded() { //CODE TO EXECUTE WHEN DOMAIN HAS BEEN LOADED
