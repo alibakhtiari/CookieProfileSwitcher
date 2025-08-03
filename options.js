@@ -1,38 +1,27 @@
-var extVersionNumber = extension.getExtensionVersion();
 
 
 function init(){
-	$('#about-extension-version').html(extVersionNumber);
-	loadChangelog();
+	document.getElementById('about-extension-version').textContent = chrome.runtime.getManifest().version;
 	loadProfileData();
-}
-
-function loadChangelog() {
-	var url = extension.getResourceURL("changelog.md");
-	$.get(url).done(function(text) {
-		var converter = new showdown.Converter();
-		var html = converter.makeHtml(text);
-		$("#changelog-content").html(html);
-	});
 }
 
 function loadProfileData(){
 	chrome.storage.local.get('profiles', function(items){
 		var profile;
-		if(jQuery.isEmptyObject(items) || jQuery.isEmptyObject(items.profiles)){
+		if(Object.keys(items).length === 0 || Object.keys(items.profiles).length === 0){
 			
 		}
 		else{
 			profile = JSON.parse(JSON.stringify(items.profiles));
-			$('#profile-data-textarea').val(JSON.stringify(profile, undefined, "\t"));
+			document.getElementById('profile-data-textarea').value = JSON.stringify(profile, undefined, "\t");
 		}
 	});
 	
 }
 
 function saveProfileData(){
-	var profile = JSON.parse($('#profile-data-textarea').val());
-	if(!jQuery.isEmptyObject(profile)){
+	var profile = JSON.parse(document.getElementById('profile-data-textarea').value);
+	if(Object.keys(profile).length !== 0){
 		if(confirm("Are you sure you want to save profile data?")){
 			chrome.storage.local.set({'profiles': profile}, function(){
 			});
@@ -47,7 +36,7 @@ function clearProfileData(){
 	var profile = {};
 	if(confirm("Are you sure you want to clear profile data?")){
 		chrome.storage.local.set({'profiles': profile}, function(){
-			$('#profile-data-textarea').val("");
+			document.getElementById('profile-data-textarea').value = "";
 		});
 	}
 	else{
@@ -56,7 +45,7 @@ function clearProfileData(){
 function exportProfileData(){
 	chrome.storage.local.get('profiles', function(items){
 		var profile;
-		if(jQuery.isEmptyObject(items) || jQuery.isEmptyObject(items.profiles)){
+		if(Object.keys(items).length === 0 || Object.keys(items.profiles).length === 0){
 			
 		}
 		else{
@@ -67,44 +56,6 @@ function exportProfileData(){
 	});
 }
 
-function clearCookieData(){
-	chrome.storage.local.get('profiles', function(items){
-		var profile;
-		if(!jQuery.isEmptyObject(items) && !jQuery.isEmptyObject(items.profiles)){
-			profile = JSON.parse(JSON.stringify(items.profiles));
-			console.log(JSON.stringify(profile));
-		}
-	});
-}
-
-function sendEmail() {
-    var emailUrl = "mailto:emerysteele@gmail.com?Subject=Cookie%20Profile%20Switcher%20-%20Feedback";
-    chrome.tabs.create({ url: emailUrl }, function(tab) {
-        setTimeout(function() {
-            chrome.tabs.remove(tab.id);
-        }, 500);
-    });
-}
-
-function syntaxHighlight(json) {
-    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
-        var cls = 'number';
-        if (/^"/.test(match)) {
-            if (/:$/.test(match)) {
-                cls = 'key';
-            } else {
-                cls = 'string';
-            }
-        } else if (/true|false/.test(match)) {
-            cls = 'boolean';
-        } else if (/null/.test(match)) {
-            cls = 'null';
-        }
-        return '<span class="' + cls + '">' + match + '</span>';
-    });
-}
-
 function importProfileData(e){
 	var files = e.target.files, reader = new FileReader();
 	reader.onload = _imp;
@@ -113,12 +64,12 @@ function importProfileData(e){
 
 function _imp() {
 	var _myImportedData = JSON.parse(this.result);
-	if(!jQuery.isEmptyObject(_myImportedData)){
+	if(Object.keys(_myImportedData).length !== 0){
 		chrome.storage.local.set({'profiles': _myImportedData}, function(){
-			$('#profile-data-textarea').val(JSON.stringify(_myImportedData, undefined, "\t"));
+			document.getElementById('profile-data-textarea').value = JSON.stringify(_myImportedData, undefined, "\t");
 		});
 	}
-	$('#import-profile-data-input').val("");
+	document.getElementById('import-profile-data-input').value = "";
 }
 
 
@@ -136,17 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
   init();
   document.querySelector('#save-profile-data').addEventListener('click', saveProfileData);
   document.querySelector('#clear-profile-data').addEventListener('click', clearProfileData);
-  //document.querySelector('#clear-cookie-data').addEventListener('click', clearCookieData);
-  document.querySelector('#import-profile-data').addEventListener('click', function(){$('#import-profile-data-input').click();});
+  document.querySelector('#import-profile-data').addEventListener('click', function(){document.getElementById('import-profile-data-input').click();});
   document.querySelector('#import-profile-data-input').addEventListener('change', importProfileData);
   document.querySelector('#export-profile-data').addEventListener('click', exportProfileData);
-  document.querySelector('#send-email').addEventListener('click', sendEmail);
-  //document.querySelector('#profileCreate_button').addEventListener('click', newProfile);
-  //document.body.addEventListener('click', focusFilter);
-  //document.querySelector('#remove_button').addEventListener('click', removeAll);
-  //document.querySelector('#import_button').addEventListener('click', importCookies);
-  //document.querySelector('#filter_div input').addEventListener(
-  //    'input', reloadCookieTable);
-  //document.querySelector('#filter_div button').addEventListener(
-  //    'click', resetFilter); 
 });
