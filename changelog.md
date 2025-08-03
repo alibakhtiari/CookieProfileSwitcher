@@ -1,4 +1,16 @@
 # Changelog
+## 2.0.0
+- Migrated to Manifest V3.
+- Removed jQuery and Bootstrap dependencies.
+- Refactored JavaScript to vanilla JS.
+- Refactored CSS to plain CSS.
+- Removed unnecessary files and folders (less, scss, fonts, old js/css libraries).
+- Fixed `chrome.tabs.executeScript` deprecation by using `chrome.scripting.executeScript`.
+- Added null checks and try-catch for cookie handling to prevent errors.
+- Fixed Uncaught (in promise) Error: Failed to parse or set cookie named "__Host-next-auth.csrf-token".
+- Optimized overall User Interface and User Experience
+
+
 ## 1.3.3
 - Extension was broken. Update code to remove leading '.' from url that was introduced with chrome api update.
 
